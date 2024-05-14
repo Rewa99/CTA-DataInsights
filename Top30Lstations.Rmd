@@ -1,0 +1,80 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+
+```{r}
+transport_data <- read.csv("C:\\Users\\hp\\OneDrive\\Documents\\Semester 2\\Data Prep\\Project\\CTA_-_Ridership_-__L__Station_Entries_-_Monthly_Day-Type_Averages___Totals-2.csv")
+distinct_data = subset(transport_data, !duplicated(station_name))
+distinct_data$stationame
+
+```
+
+
+```{r}
+summary(transport_data)
+```
+
+```{r}
+df= data.frame(transport_data)
+df$avg_weekday_rides <- gsub("[^0-9]", "", df$avg_weekday_rides)
+df$avg_weekday_rides <- as.numeric(df$avg_weekday_rides)
+df$avg_saturday_rides <- gsub("[^0-9]", "", df$avg_saturday_rides)
+df$avg_saturday_rides <- as.numeric(df$avg_saturday_rides)
+df$avg_Sunday_holiday_rides <- gsub("[^0-9]", "", df$avg_Sunday_holiday_rides)
+df$avg_Sunday_holiday_rides <- as.numeric(df$avg_Sunday_holiday_rides)
+df_means <- df %>% group_by(stationame) %>% summarize(avg_weekday_rides = mean(avg_weekday_rides),
+                                                  avg_saturday_rides = mean(avg_saturday_rides),
+                                                  avg_Sunday_holiday_rides = mean(avg_Sunday_holiday_rides))
+# Sort data frame by avg_weekday_rides in descending order
+sum_by_station <- df_means[order(df_means$avg_weekday_rides, decreasing = TRUE),]
+
+# Subset data frame to top 10 stations
+sum_by_station <- head(sum_by_station, n = 30)
+sum_by_station$stationame <- factor(sum_by_station$stationame, levels = sum_by_station$stationame[order(sum_by_station$avg_weekday_rides)])
+colors <- rainbow(nrow(sum_by_station))
+# Create horizontal bar graph with ggplot2
+ggplot(sum_by_station, aes(x = avg_weekday_rides, y = stationame, fill=stationame)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Average Weekday Rides", y = "Station Name") +
+  ggtitle("Top 30 Stations by Average Weekday Rides")
+
+sum_by_station <- df_means[order(df_means$avg_saturday_rides, decreasing = TRUE),]
+
+# Subset data frame to top 10 stations
+sum_by_station <- head(sum_by_station, n = 30)
+sum_by_station$stationame <- factor(sum_by_station$stationame, levels = sum_by_station$stationame[order(sum_by_station$avg_saturday_rides)])
+
+# Create horizontal bar graph with ggplot2
+ggplot(sum_by_station, aes(x = avg_saturday_rides, y = stationame, fill = stationame)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Average Saturday Rides", y = "Station Name") +
+  ggtitle("Top 30 Stations by Average Saturday Rides")
+
+sum_by_station <- df_means[order(df_means$avg_Sunday_holiday_rides, decreasing = TRUE),]
+
+# Subset data frame to top 10 stations
+sum_by_station <- head(sum_by_station, n = 30)
+sum_by_station$stationame <- factor(sum_by_station$stationame, levels = sum_by_station$stationame[order(sum_by_station$avg_Sunday_holiday_rides)])
+
+# Create horizontal bar graph with ggplot2
+ggplot(sum_by_station, aes(x = avg_Sunday_holiday_rides, y = stationame, fill = stationame)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Average Sunday and Holiday Rides", y = "Station Name") +
+  ggtitle("Top 30 Stations by Average Sunday and Holiday Rides")
+
+```
+
+
+
+
+
+
+
+
+
